@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { appWindow } from "@tauri-apps/api/window";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+
+const appWindow = getCurrentWebviewWindow();
 
 const close = () => {
   appWindow.close();
-
   alert("close");
 };
 
 const minimize = () => {
   appWindow.minimize();
-
   alert("minimize");
 };
 </script>

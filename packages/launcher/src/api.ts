@@ -1,4 +1,4 @@
-import { fetch } from "@tauri-apps/api/http";
+import { fetch } from "@tauri-apps/plugin-http";
 
 export type NewsResponse = {
   data: Array<{
@@ -37,13 +37,19 @@ export type AddonItem = {
   repository: string;
 };
 
-export function httpGet<T>(url: string) {
-  return fetch<T>(url, {
+export function httpGet<T extends unknown>(url: string): Promise<T> {
+  return fetch(url, {
     method: "GET",
-    timeout: 30,
+    // timeout: 30,
     headers: {
       "User-Agent": `sirus-launcher 1.3.1`,
     },
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    }
+
+    return res.text();
   });
 }
 
