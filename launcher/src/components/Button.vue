@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from "vue";
-import { open } from "@tauri-apps/api/shell";
+import { open } from "@tauri-apps/plugin-shell";
 
 const { variant, text, href, disabled } = defineProps<{
   disabled?: boolean;
@@ -76,7 +76,7 @@ button.disabled {
   font-weight: 500;
   font-family: Object Sans, sans-serif;
   padding: 0 40px;
-  border-radius: 4px;
+  border-radius: 8px;
   min-width: 240px;
 }
 

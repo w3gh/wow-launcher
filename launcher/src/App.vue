@@ -31,6 +31,7 @@ const items = ref<NewsResponse["data"]>([]);
 const cardItem = ref<NewsItem>();
 const statusRealms = ref<StatusRealm[]>([]);
 const online = ref(0);
+const viewState = ref<"news" | "addons">("news");
 
 console.log("getVersion", getVersion);
 
@@ -42,61 +43,117 @@ function hideCard() {
   cardItem.value = undefined;
 }
 
-onMounted(async () => {
-  // version.value = await getVersion();
-  console.log(version.value);
+function viewNews() {
+  viewState.value = "news";
+}
 
+function viewAddons() {
+  viewState.value = "addons";
+}
+
+onMounted(async () => {
   const status = await httpGet<StatusResponse>(
     "https://sirus.su/api/statistic/tooltip.json"
   );
 
   if (status) {
-    statusRealms.value = status.data.realms;
-    online.value = status.data.online_count;
+    statusRealms.value = status.realms;
+    online.value = status.online_count;
   }
 
-  const newsResponse = await httpGet<NewsResponse>(
-    "https://api.sirus.su/api/news"
-  );
+  const news = await httpGet<NewsResponse>("https://api.sirus.su/api/news");
 
-  if (newsResponse?.data?.data) {
-    items.value = newsResponse.data.data.splice(0, 3);
+  if (news?.data) {
+    items.value = news.data.splice(0, 3);
   }
 
   version.value = await getVersion();
-
-  console.log("response", newsResponse);
 });
 </script>
 
 <template>
   <Layout>
     <template #header>
-      <na class="primary-nav">
-        <Button variant="nav" href="#">News</Button>
-        <Button variant="nav" href="#">Addons</Button>
+      <nav class="primary-nav">
+        <Button variant="nav" @click="viewNews">Новости</Button>
+        <Button variant="nav" @click="viewAddons">Аддоны</Button>
         <DropdownMenu open-on="hover">
-          <Button variant="nav"> Game Info </Button>
+          <Button variant="nav">О Игре</Button>
           <template #primary>
-            <Button variant="nav" text="left">Search</Button>
-            <Button variant="nav" text="left">Talent Calculator</Button>
-            <Button variant="nav" text="left">Addons</Button>
-            <Button variant="nav" text="left">Raid logs</Button>
+            <Button variant="nav" text="left" href="https://sirus.su/base/x5"
+              >Поиск по базе</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/talents"
+              >Калькулятор талантов</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/pet-talents"
+              >Калькулятор талантов питомцев</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/addons"
+              >Наши Аддоны</Button
+            >
+            <Button variant="nav" text="left" href="http://siruslogs.su/"
+              >Логи Рейдов</Button
+            >
           </template>
         </DropdownMenu>
-      </na>
+      </nav>
 
       <aside class="aside-nav">
         <DropdownMenu open-on="hover">
-          <Button variant="nav">Stats</Button>
+          <Button variant="nav">Статы</Button>
           <template #primary>
-            <Button variant="nav" text="left">Arena rating</Button>
-            <Button variant="nav" text="left">BG rating</Button>
-            <Button variant="nav" text="left">PVE rating</Button>
-            <Button variant="nav" text="left">PVE progress</Button>
-            <Button variant="nav" text="left">Players online</Button>
-            <Button variant="nav" text="left">Changelog</Button>
-            <Button variant="nav" text="left">Snowman</Button>
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/ladder/bg/x5"
+              >Рейтинги BG</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/ladder/arena/x5"
+              >Рейтинги арены</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/ladder/pve/players/x5"
+              >Рейтинги PVE</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/pve-progression/realm-progress/x5"
+              >PVE Прогресс</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/statistic/online"
+              >Игроки онлайн</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/statistic/changelog"
+              >Список изменений</Button
+            >
+            <Button
+              variant="nav"
+              text="left"
+              href="https://sirus.su/base/events/frozen-snowman-lair"
+              >Замерзший снеговик</Button
+            >
           </template>
         </DropdownMenu>
         <DropdownMenu open-on="hover">
@@ -119,9 +176,13 @@ onMounted(async () => {
       </aside>
     </template>
 
-    <Addons />
-    <CardFull v-if="cardItem" :item="cardItem" @back="hideCard" />
-    <CardList v-else :items="items" @show="showCard" />
+    <sction v-if="viewState === 'addons'">
+      <Addons />
+    </sction>
+    <section v-if="viewState === 'news'">
+      <CardFull v-if="cardItem" :item="cardItem" @back="hideCard" />
+      <CardList v-else :items="items" @show="showCard" />
+    </section>
 
     <template #aside>
       <div id="logo"></div>
@@ -165,6 +226,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+#app {
+  width: 100%;
+}
+
 .play-button {
   position: relative;
   display: flex;
